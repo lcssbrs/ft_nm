@@ -7,10 +7,8 @@ int main(int ac, char **ag)
 {
     if (ac < 2)
     {
-        print_adress((uintptr_t)ft_putstr);
+      printf("%p\n", ag[1]);
         printf("\n");
-        printf("%p\n", ft_putstr);
-        ft_putstr("Usage: ft_nm [file]\n");
         return (1);
     }
 }
