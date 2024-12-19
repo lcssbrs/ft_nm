@@ -23,10 +23,12 @@ ${PROG}:	${OBJS}
 
 clean:
 					@make clean -C ./Libft
+					@make clean -C ./printf
 					@rm -f ${OBJS} ${OBJS_B}
 
 fclean: 	clean
 					@make fclean -C ./Libft
+					@make fclean -C ./printf
 					@rm -f $(NAME)
 					@rm -f ${PROG}
 					@echo "\n\033[31mDeleting EVERYTHING!\n"

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf_unsigned.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lseiberr <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/05 16:23:29 by lseiberr          #+#    #+#             */
-/*   Updated: 2023/09/05 16:28:40 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/19 16:50:28 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ char	*ft_unsigneditoa(unsigned int n)
 	char			*num;
 
 	len = 0;
-	temp = n; 
+	temp = n;
 	while (temp >= 10)
 	{
 		temp = temp / 10;
