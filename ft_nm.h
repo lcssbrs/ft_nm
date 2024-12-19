@@ -20,8 +20,12 @@
 # include <sys/mman.h>
 # include <stdio.h>
 # include <sys/types.h>
+# include <unistd.h>
 # include <sys/stat.h>
+# include <string.h>
 # include <stdlib.h>
 # include "includes/elf.h"
+# include <stdint.h>
+
 
 #endif
