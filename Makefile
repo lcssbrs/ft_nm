@@ -1,43 +1,36 @@
-# Variables
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
-LIBFT_DIR = libft
-FT_PRINTF_DIR = ft_printf
-SRC_DIR = src
-OBJ_DIR = obj
-INCLUDE_DIR = header
-LIBFT = $(LIBFT_DIR)/libft.a
-FT_PRINTF = $(FT_PRINTF_DIR)/libftprintf.a
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-NAME = my_program
+PROG	= ft_nm
 
-# Règles
-all: $(LIBFT) $(FT_PRINTF) $(NAME)
+SRCS 	= main.c
+OBJS 	= ${SRCS:.c=.o}
+MAIN	= main.c
 
-$(LIBFT):
-	@$(MAKE) -C $(LIBFT_DIR)
+HEADER	= -Iinclude
 
-$(FT_PRINTF):
-	@$(MAKE) -C $(FT_PRINTF_DIR)
+CC 		= gcc
+CFLAGS 	= -Wall -Wextra -Werror -g
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) -I $(INCLUDE_DIR) -c $< -o $@
+.c.o:		%.o : %.c
+					@gcc ${CFLAGS} ${HEADER} -c $< -o $(<:.c=.o)
 
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT) $(FT_PRINTF)
+all: 		${PROG}
+
+${PROG}:	${OBJS}
+					@echo "\033[33m----Compiling lib----"
+					@make re -C ./Libft
+					@make re -C ./printf
+					@$(CC) ${OBJS} -LLibft -lft -Lprintf -lprintf -o ${PROG}
+					@echo "\033[32mFT_NM Compiled!\n"
 
 clean:
-	@$(MAKE) -C $(LIBFT_DIR) clean
-	@$(MAKE) -C $(FT_PRINTF_DIR) clean
-	rm -rf $(OBJ_DIR)
+					@make clean -C ./Libft
+					@rm -f ${OBJS} ${OBJS_B}
 
-fclean: clean
-	@$(MAKE) -C $(LIBFT_DIR) fclean
-	@$(MAKE) -C $(FT_PRINTF_DIR) fclean
-	rm -f $(NAME)
+fclean: 	clean
+					@make fclean -C ./Libft
+					@rm -f $(NAME)
+					@rm -f ${PROG}
+					@echo "\n\033[31mDeleting EVERYTHING!\n"
 
-re: fclean all
+re:			fclean all
 
 .PHONY: all clean fclean re

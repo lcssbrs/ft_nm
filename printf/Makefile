@@ -1,6 +1,6 @@
 #Standard
 
-NAME = libftprintf.a
+NAME = libprintf.a
 INCLUDES = include/
 SRCS_DIR = src/
 OBJS_DIR = obj/
