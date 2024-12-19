@@ -7,7 +7,7 @@ OBJS_DIR = obj/
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -I$(INCLUDES)
 RM = rm -f
-AR = ar rcs
+AR = /usr/bin/ar -rcs
 .c.o:
 	${CC} ${CFLAGS} -c $< -o ${<:.c=.o}
 
@@ -34,10 +34,8 @@ OBJSF = .cache_exists
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	@$(AR) $(NAME) $(OBJS)
-	@ranlib $(NAME)
-	@echo "$(GREEN)Printf compiled!$(DEF_COLOR)"
+${NAME}: ${OBJS}
+	/usr/bin/ar -rcs ${NAME} ${OBJS}
 
 $(OBJS_DIR)%.o : $(SRCS_DIR)%.c | $(OBJSF)
 	@echo "$(YELLOW)Compiling: $< $(DEF_COLOR)"
