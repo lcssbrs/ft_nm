@@ -18,7 +18,7 @@ FLAGS = -Wall -Wextra -Werror
 	${CC} ${FLAGS} -c $< -o ${<:.c=.o}
 
 ${NAME}: ${OBJS}
-	ar -rcs ${NAME} ${OBJS}
+	/usr/bin/ar -rcs ${NAME} ${OBJS}
 
 all: ${NAME}
 
