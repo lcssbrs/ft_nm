@@ -6,12 +6,16 @@
 /*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 16:49:46 by lseiberr          #+#    #+#             */
-/*   Updated: 2024/12/20 13:02:21 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/20 13:32:18 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_nm.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <elf.h>
 
 #define ELF64_SECTION_HEADER_SIZE 0x40
 
@@ -74,11 +78,6 @@ bool open_elf(char *filename, void **ptr)
 	return (true);
     }
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <elf.h>
-
 // Structure pour stocker les symboles et leurs informations
 typedef struct s_symbol
 {
@@ -87,43 +86,69 @@ typedef struct s_symbol
     char *name;             // Nom du symbole
 } t_symbol;
 
-// Fonction de comparaison pour trier les symboles par nom
 int compare_symbols_by_name(const void *a, const void *b)
 {
     t_symbol *symbol_a = (t_symbol *)a;
     t_symbol *symbol_b = (t_symbol *)b;
 
-    return strcmp(symbol_a->name, symbol_b->name);  // Trie lexicographiquement par le nom
+    return strcmp(symbol_a->name, symbol_b->name);
 }
 
 void print_symbol(t_symbol symbol)
 {
-    // Affichage de l'adresse
     if (symbol.address == 0)
-        printf("                 "); // 16 espaces pour les symboles non définis
+        ft_printf("                 ");
     else
-        printf("%016lx ", symbol.address); // Afficher l'adresse sur 16 caractères
-
-    // Affichage du type de symbole
-    printf("%c ", symbol.type);
-
-    // Affichage du nom du symbole
-    printf("%s\n", symbol.name);
+        ft_printf("0000000000000%x ", symbol.address);
+    ft_printf("%c ", symbol.type);
+    ft_printf("%s\n", symbol.name);
 }
 
 void print_symbol32(t_symbol symbol)
 {
-    // Affichage de l'adresse
     if (symbol.address == 0)
-        printf("                 "); // 16 espaces pour les symboles non définis
+        ft_printf("         ");
     else
-        printf("%08lx ", symbol.address); // Afficher l'adresse sur 16 caractères
+        ft_printf("000%x ", symbol.address);
+    ft_printf("%c ", symbol.type);
+    ft_printf("%s\n", symbol.name);
+}
 
-    // Affichage du type de symbole
-    printf("%c ", symbol.type);
+void ft_qsort(void *base, size_t n_items, size_t size, int (*compar)(const void *, const void *))
+{
+    if (n_items < 2)
+        return;
 
-    // Affichage du nom du symbole
-    printf("%s\n", symbol.name);
+    char *arr = (char *)base;
+    char *pivot = arr + (n_items / 2) * size;
+    size_t i = 0;
+    size_t j = n_items - 1;
+
+    // Partitionnement autour du pivot
+    while (i <= j)
+    {
+        while (compar(arr + i * size, pivot) < 0)
+            i++;
+        while (compar(arr + j * size, pivot) > 0)
+            j--;
+
+        if (i <= j)
+        {
+            // Échanger les éléments
+            char temp[size];
+            memcpy(temp, arr + i * size, size);
+            memcpy(arr + i * size, arr + j * size, size);
+            memcpy(arr + j * size, temp, size);
+            i++;
+            j--;
+        }
+    }
+
+    // Tri récursif des sous-tableaux
+    if (j > 0)
+        ft_qsort(base, j + 1, size, compar);
+    if (i < n_items)
+        ft_qsort(arr + i * size, n_items - i, size, compar);
 }
 
 void parse_symbol(void *ptr, Elf64_Shdr *section_headers, int i)
@@ -139,27 +164,18 @@ void parse_symbol(void *ptr, Elf64_Shdr *section_headers, int i)
     {
         Elf64_Sym *sym = &symbols[j];
         const char *sym_name = &sym_string_table[sym->st_name];
-
-        // Ignorer les symboles sans nom
         if (sym_name == NULL || sym->st_name == 0)
             continue;
-
-        // Ignorer les symboles de type STT_FILE (symboles de type "a")
         if (ELF64_ST_TYPE(sym->st_info) == STT_FILE)
             continue;
-
-        // Ignorer les symboles dont le nom commence par $ (comme $d, $x, etc.)
         if (sym_name[0] == '$')
             continue;
 
         unsigned char sym_bind = ELF64_ST_BIND(sym->st_info);
         unsigned char sym_type = ELF64_ST_TYPE(sym->st_info);
         t_symbol symbol;
-
-        // Affecter l'adresse du symbole
         symbol.address = sym->st_value;
 
-        // Déterminer le type du symbole
         if (sym_bind == STB_GLOBAL)
         {
             if (sym_type == STT_OBJECT)
@@ -182,31 +198,19 @@ void parse_symbol(void *ptr, Elf64_Shdr *section_headers, int i)
             else if (sym_type == STT_SECTION)
                 symbol.type = 's';  // Section locale
             else
-                symbol.type = 'a';  // Symbole de type STT_FILE (qu'on veut ignorer)
+                symbol.type = 'a';
         }
-
-        // Si c'est un symbole de type 'a', on l'ignore
         if (symbol.type == 'a')
             continue;
-
-        // Copier le nom du symbole
-        symbol.name = strdup(sym_name);
-
-        // Ajouter le symbole à notre tableau
+        symbol.name = ft_strdup((char *)sym_name);
         symbols_array[symbol_index++] = symbol;
     }
-
-    // Trier les symboles par nom (lexicographiquement)
-    qsort(symbols_array, symbol_index, sizeof(t_symbol), compare_symbols_by_name);
-
-    // Afficher les symboles triés
+    ft_qsort(symbols_array, symbol_index, sizeof(t_symbol), compare_symbols_by_name);
     for (int i = 0; i < symbol_index; i++)
     {
         print_symbol(symbols_array[i]);
         free(symbols_array[i].name);
     }
-
-    // Libérer la mémoire allouée pour le tableau des symboles
     free(symbols_array);
 }
 
@@ -224,74 +228,54 @@ void parse_symbol32(void *ptr, Elf32_Shdr *section_headers, int i)
     {
         Elf32_Sym *sym = &symbols[j];
         const char *sym_name = &sym_string_table[sym->st_name];
-
-        // Ignorer les symboles sans nom
         if (sym_name == NULL || sym->st_name == 0)
             continue;
-
-        // Ignorer les symboles de type STT_FILE (symboles de type "a")
         if (ELF32_ST_TYPE(sym->st_info) == STT_FILE)
             continue;
-
-        // Ignorer les symboles dont le nom commence par $ (comme $d, $x, etc.)
         if (sym_name[0] == '$')
             continue;
 
         unsigned char sym_bind = ELF32_ST_BIND(sym->st_info);
         unsigned char sym_type = ELF32_ST_TYPE(sym->st_info);
         t_symbol symbol;
-
-        // Affecter l'adresse du symbole
         symbol.address = sym->st_value;
 
         // Déterminer le type du symbole
         if (sym_bind == STB_GLOBAL)
         {
             if (sym_type == STT_OBJECT)
-                symbol.type = 'D';  // Données globales
+                symbol.type = 'D';
             else if (sym_type == STT_FUNC)
-                symbol.type = 'T';  // Fonction globale
+                symbol.type = 'T';
             else if (sym_type == STT_SECTION)
-                symbol.type = 'S';  // Section
+                symbol.type = 'S';
             else if (sym->st_value == 0)
-                symbol.type = 'U';  // Non défini
+                symbol.type = 'U';
             else
-                symbol.type = 'A';  // Autre type
+                symbol.type = 'A';
         }
         else if (sym_bind == STB_LOCAL)
         {
             if (sym_type == STT_FUNC)
-                symbol.type = 't';  // Fonction locale
+                symbol.type = 't';
             else if (sym_type == STT_OBJECT)
-                symbol.type = 'd';  // Donnée locale
+                symbol.type = 'd';
             else if (sym_type == STT_SECTION)
-                symbol.type = 's';  // Section locale
+                symbol.type = 's';
             else
-                symbol.type = 'a';  // Symbole de type STT_FILE (qu'on veut ignorer)
+                symbol.type = 'a';
         }
-
-        // Si c'est un symbole de type 'a', on l'ignore
         if (symbol.type == 'a')
             continue;
-
-        // Copier le nom du symbole
-        symbol.name = strdup(sym_name);
-
-        // Ajouter le symbole à notre tableau
+        symbol.name = ft_strdup((char*)sym_name);
         symbols_array[symbol_index++] = symbol;
     }
-
-    // Trier les symboles par nom (lexicographiquement)
-    qsort(symbols_array, symbol_index, sizeof(t_symbol), compare_symbols_by_name);
-
-    // Afficher les symboles triés
+    ft_qsort(symbols_array, symbol_index, sizeof(t_symbol), compare_symbols_by_name);
     for (int i = 0; i < symbol_index; i++)
     {
         print_symbol32(symbols_array[i]);
         free(symbols_array[i].name);
     }
-
-    // Libérer la mémoire allouée pour le tableau des symboles
     free(symbols_array);
 }
 

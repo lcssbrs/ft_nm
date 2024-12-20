@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf_utils_second.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lseiberr <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/22 18:02:57 by lseiberr          #+#    #+#             */
-/*   Updated: 2023/04/22 18:03:03 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/20 13:30:21 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,34 +55,4 @@ char	*ft_itoa(int n)
 		n /= 10;
 	}
 	return (str);
-}
-
-char	*ft_strdup(char *src)
-{
-	char	*tab;
-	size_t	i;
-	size_t	len;
-
-	len = ft_strlen(src);
-	tab = (char *)(malloc(sizeof(char) * (len + 1)));
-	if (tab == NULL)
-		return (NULL);
-	i = 0;
-	while (src[i] != '\0')
-	{
-		tab[i] = src[i];
-		i++;
-	}
-	tab[i] = '\0';
-	return (tab);
-}
-
-size_t	ft_strlen(const char *str)
-{
-	size_t	i;
-
-	i = 0;
-	while (str[i] != '\0')
-		i++;
-	return (i);
 }
