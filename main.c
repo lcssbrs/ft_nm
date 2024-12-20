@@ -6,7 +6,7 @@
 /*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 16:49:46 by lseiberr          #+#    #+#             */
-/*   Updated: 2024/12/20 13:52:25 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/20 13:57:58 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,11 @@ void print_symbol32(t_symbol symbol)
     if (symbol.address == 0)
         ft_printf("         ");
     else
+    {
         ft_printhex32(symbol.address);
+        ft_printf(" ");
+    }
+
     ft_printf("%c ", symbol.type);
     ft_printf("%s\n", symbol.name);
 }
