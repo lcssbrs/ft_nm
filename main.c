@@ -6,7 +6,7 @@
 /*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 16:49:46 by lseiberr          #+#    #+#             */
-/*   Updated: 2024/12/20 12:28:20 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/20 12:39:28 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,6 @@ bool is_valid_elf(void *ptr, int *endian, int *bit)
         return (false);
         }
     *endian = header->e_ident[EI_DATA];
-    if (*endian == ELFDATA2LSB)
-        ft_printf("Little endian\n");
-    else if (*endian == ELFDATA2MSB)
-        ft_printf("Big endian\n");
-    else
-      {
-        ft_printf("Invalid endian\n");
-        return (false);
-        }
     *bit = header->e_ident[EI_CLASS];
     if (*bit == ELFCLASS32)
         ft_printf("32 bits\n");
@@ -99,7 +90,7 @@ void parse_symbol(void *ptr, Elf64_Shdr *section_headers, int i){
                 printf("                 O");
             else if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC)
             {
-                printf("%016x ", sym->st_value);
+                printf("%016lx ", sym->st_value);
                 printf("T");
             }
             else if (ELF32_ST_TYPE(sym->st_info) == STT_SECTION)
@@ -152,8 +143,8 @@ int main(int ac, char **ag)
 {
     char *filename;
 	void *ptr;
-    int bit;
-    int endian;
+    int bit = 0;
+    int endian = 0;
 
 
     filename = "a.out";
@@ -161,8 +152,12 @@ int main(int ac, char **ag)
       {
         filename = ag[1];
       }
-    if (open_elf(filename, &ptr) == false && is_valid_elf(ptr, &endian, &bit) == false)
-      return (1);
+    if (!open_elf(filename, &ptr))
+        return (1);
+    if (!is_valid_elf(ptr, &endian, &bit))
+    {
+        return (1);
+    }
 	if (bit == ELFCLASS32)
     {
         Elf32_Ehdr *header = (Elf32_Ehdr *)ptr;
@@ -170,8 +165,6 @@ int main(int ac, char **ag)
 
         for (int i = 0; i < header->e_shnum; i++)
         {
-            printf("filename: %s\n", filename);
-            //printf("Section %d: %s\n", i, section_name);
             if (section_headers[i].sh_type == SHT_SYMTAB)
             {
                 parse_symbol32(ptr, section_headers, i);
@@ -185,8 +178,6 @@ int main(int ac, char **ag)
 
         for (int i = 0; i < header->e_shnum; i++)
         {
-            printf("filename: %s\n", filename);
-            //printf("Section %d: %s\n", i, section_name);
             if (section_headers[i].sh_type == SHT_SYMTAB)
             {
                 parse_symbol(ptr, section_headers, i);
