@@ -6,7 +6,7 @@
 /*   By: lseiberr <lseiberr@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 16:49:46 by lseiberr          #+#    #+#             */
-/*   Updated: 2024/12/20 13:32:18 by lseiberr         ###   ########.fr       */
+/*   Updated: 2024/12/20 13:52:25 by lseiberr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,58 @@ int compare_symbols_by_name(const void *a, const void *b)
     t_symbol *symbol_a = (t_symbol *)a;
     t_symbol *symbol_b = (t_symbol *)b;
 
-    return strcmp(symbol_a->name, symbol_b->name);
+    return ft_strncmp(symbol_a->name, symbol_b->name, 100);
+}
+
+void	ft_puthex32(long long num)
+{
+	char	*base;
+
+	base = "0123456789abcdef";  // Utilisation de l'alphabet hexadécimal en minuscules
+	if (num >= 16)
+	{
+		ft_puthex32(num / 16);
+		ft_puthex32(num % 16);
+	}
+	else
+	{
+		write(1, &base[num], 1);
+	}
+}
+
+int	ft_printhex32(long long num)
+{
+	int len;
+	int width = 8;  // Largeur totale à atteindre (16 caractères)
+	int padding = 0;
+
+	// Afficher le préfixe "0x"
+	write(1, "0x", 2);
+
+	// Si le numéro est zéro, afficher "0x0" (un seul zéro)
+	if (num == 0)
+	{
+		write(1, "0", 1);
+		return (3);  // "0x" + "0" = 3 caractères
+	}
+
+	// Calculer la longueur de l'adresse en hexadécimal
+	len = ft_hex_len(num);
+	// Calculer combien de zéros ajouter pour que l'affichage ait une largeur de 16 caractères
+	padding = width - 2 - len;  // Le préfixe "0x" compte déjà pour 2 caractères
+
+	// Ajouter les zéros nécessaires pour compléter la largeur
+	while (padding > 0)
+	{
+		write(1, "0", 1);
+		padding--;
+	}
+
+	// Afficher l'adresse en hexadécimal
+	ft_puthex32(num);
+
+	// Retourner la longueur totale : "0x" + adresse en hex (avec padding)
+	return (len + 2 + (width - 2 - len));  // +2 pour "0x" et + padding pour les zéros
 }
 
 void print_symbol(t_symbol symbol)
@@ -99,7 +150,7 @@ void print_symbol(t_symbol symbol)
     if (symbol.address == 0)
         ft_printf("                 ");
     else
-        ft_printf("0000000000000%x ", symbol.address);
+        ft_printf("%x ", symbol.address);
     ft_printf("%c ", symbol.type);
     ft_printf("%s\n", symbol.name);
 }
@@ -109,7 +160,7 @@ void print_symbol32(t_symbol symbol)
     if (symbol.address == 0)
         ft_printf("         ");
     else
-        ft_printf("000%x ", symbol.address);
+        ft_printhex32(symbol.address);
     ft_printf("%c ", symbol.type);
     ft_printf("%s\n", symbol.name);
 }
